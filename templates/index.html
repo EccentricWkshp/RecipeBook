@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-4">Recipes</h1>
+
+<div class="mb-4">
+    <div class="row">
+        <div class="col-md-8">
+            <input type="text" id="search" class="form-control" placeholder="Search recipes...">
+        </div>
+        <div class="col-md-4">
+            <select id="category-filter" class="form-select">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="recipe-list" class="row">
+    {% for recipe in recipes %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            {% if recipe.image %}
+            <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" class="card-img-top" alt="{{ recipe.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ recipe.title }}</h5>
+                <div class="card-text">
+                    {% if recipe.description %}
+                        {{ recipe.description | safe | truncate(100, True, '...') }}
+                    {% else %}
+                        <p>No description available.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('recipe', id=recipe.id) }}" class="btn btn-primary">
+                    <i class="fas fa-eye"></i> View Recipe
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    const categoryFilter = document.getElementById('category-filter');
+    const recipeList = document.getElementById('recipe-list');
+
+    function performSearch() {
+        const query = searchInput.value;
+        const categoryId = categoryFilter.value;
+        
+        fetch(`/search?query=${query}&category=${categoryId}`)
+            .then(response => response.json())
+            .then(recipes => {
+                recipeList.innerHTML = '';
+                recipes.forEach(recipe => {
+                    const recipeCard = `
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                ${recipe.image ? `<img src="/static/uploads/${recipe.image}" class="card-img-top" alt="${recipe.title}">` : ''}
+                                <div class="card-body">
+                                    <h5 class="card-title">${recipe.title}</h5>
+                                    <div class="card-text">${recipe.description || 'No description available.'}</div>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="/recipe/${recipe.id}" class="btn btn-primary">
+                                        <i class="fas fa-eye"></i> View Recipe
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    recipeList.innerHTML += recipeCard;
+                });
+            });
+    }
+
+    searchInput.addEventListener('input', performSearch);
+    categoryFilter.addEventListener('change', performSearch);
+});
+</script>
+{% endblock %}
