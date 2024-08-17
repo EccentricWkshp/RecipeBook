@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="card">
     <div class="card-body">
         <h1 class="card-title mb-4">Add New Recipe</h1>
@@ -10,15 +11,15 @@
             </div>
             <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
-                <textarea class="form-control ckeditor" id="description" name="description"></textarea>
+                <textarea class="form-control" id="description" name="description"></textarea>
             </div>
             <div class="mb-3">
                 <label for="ingredients" class="form-label">Ingredients</label>
-                <textarea class="form-control ckeditor" id="ingredients" name="ingredients" required></textarea>
+                <textarea class="form-control" id="ingredients" name="ingredients" required></textarea>
             </div>
             <div class="mb-3">
                 <label for="instructions" class="form-label">Instructions</label>
-                <textarea class="form-control ckeditor" id="instructions" name="instructions" required></textarea>
+                <textarea class="form-control" id="instructions" name="instructions" required></textarea>
             </div>
             <div class="mb-3">
                 <label for="source" class="form-label">Source</label>
@@ -33,21 +34,35 @@
                 <select class="form-select" id="category" name="category">
                     <option value="">Select a category</option>
                     {% for category in categories %}
-                    <option value="{{ category.id }}">{{ category.name }}</option>
+                        <option value="{{ category.id }}">{{ category.name }}</option>
                     {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="difficulty" class="form-label">Difficulty</label>
+                <select class="form-select" id="difficulty" name="difficulty" required>
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Add Recipe</button>
         </form>
     </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
 <script>
-    CKEDITOR.replace('description');
-    CKEDITOR.replace('ingredients');
-    CKEDITOR.replace('instructions');
+    document.addEventListener('DOMContentLoaded', (event) => {
+        ['description', 'ingredients', 'instructions'].forEach(fieldName => {
+            ClassicEditor
+                .create(document.getElementById(fieldName))
+                .catch(error => {
+                    console.error(error);
+                });
+        });
+    });
 </script>
 {% endblock %}

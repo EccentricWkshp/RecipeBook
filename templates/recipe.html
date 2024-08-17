@@ -1,63 +1,66 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="recipe-detail">
     <h1 class="mb-4">{{ recipe.title }}</h1>
-    
+
     <div class="mb-4">
-        <a href="{{ url_for('edit_recipe', id=recipe.id) }}" class="btn btn-primary">
-            <i class="fas fa-edit"></i> Edit Recipe
-        </a>
+        <a href="{{ url_for('edit_recipe', id=recipe.id) }}" class="btn btn-primary">Edit Recipe</a>
         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-            <i class="fas fa-trash"></i> Delete Recipe
+            Delete Recipe
         </button>
     </div>
-    
+
     {% if recipe.image %}
-    <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" alt="{{ recipe.title }}" class="img-fluid mb-4">
+        <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" alt="{{ recipe.title }}" class="img-fluid mb-4">
     {% endif %}
-    
+
     <div class="mb-4">
         <h2>Description</h2>
-        {{ recipe.description | safe }}
+        <p>{{ recipe.description | safe }}</p>
     </div>
-    
+
     <div class="mb-4">
         <h2>Ingredients</h2>
         {{ recipe.ingredients | safe }}
     </div>
-    
+
     <div class="mb-4">
         <h2>Instructions</h2>
         {{ recipe.instructions | safe }}
     </div>
-    
+
     {% if recipe.source %}
     <div class="mb-4">
         <h2>Source</h2>
         {% if recipe.source.startswith('http') %}
-        <a href="{{ recipe.source }}" target="_blank">{{ recipe.source }}</a>
+            <a href="{{ recipe.source }}" target="_blank">{{ recipe.source }}</a>
         {% else %}
-        {{ recipe.source }}
+            {{ recipe.source }}
         {% endif %}
     </div>
     {% endif %}
-    
+
     {% if recipe.category %}
     <div class="mb-4">
         <h2>Category</h2>
         <a href="{{ url_for('category', id=recipe.category.id) }}">{{ recipe.category.name }}</a>
     </div>
     {% endif %}
-    
-    <p class="small">Created: {{ recipe.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-    <p class="small">Last updated: {{ recipe.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-    
-    <a href="{{ url_for('index') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Recipes
-    </a>
+
+    <div class="mb-4">
+        <h2>Difficulty</h2>
+        <p>{{ recipe.difficulty | capitalize }}</p>
+    </div>
+
+    <div class="mb-4">
+        <p>Created: {{ recipe.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        <p>Last updated: {{ recipe.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    </div>
+
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Recipes</a>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -77,4 +80,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}

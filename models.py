@@ -24,6 +24,7 @@ class Recipe(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
     category = db.relationship('Category', backref=db.backref('recipes', lazy=True))
+    difficulty = db.Column(db.String(20), nullable=False, default='medium')
 
     def __repr__(self):
         return f'<Recipe {self.title}>'

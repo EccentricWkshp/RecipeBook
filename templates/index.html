@@ -1,21 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h1 class="mb-4">Recipes</h1>
 
 <div class="mb-4">
-    <div class="row">
-        <div class="col-md-8">
-            <input type="text" id="search" class="form-control" placeholder="Search recipes...">
+    <form id="search-form" method="GET" action="{{ url_for('index') }}">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" id="search" name="search" placeholder="Search recipes..." value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="category" name="category">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if request.args.get('category')|int == category.id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="difficulty" name="difficulty">
+                    <option value="">All Difficulties</option>
+                    <option value="easy" {% if request.args.get('difficulty') == 'easy' %}selected{% endif %}>Easy</option>
+                    <option value="medium" {% if request.args.get('difficulty') == 'medium' %}selected{% endif %}>Medium</option>
+                    <option value="hard" {% if request.args.get('difficulty') == 'hard' %}selected{% endif %}>Hard</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
         </div>
-        <div class="col-md-4">
-            <select id="category-filter" class="form-select">
-                <option value="">All Categories</option>
-                {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
+    </form>
 </div>
 
 <div id="recipe-list" class="row">
@@ -23,68 +39,118 @@
     <div class="col-md-4 mb-4">
         <div class="card h-100">
             {% if recipe.image %}
-            <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" class="card-img-top" alt="{{ recipe.title }}">
+                <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" class="card-img-top" alt="{{ recipe.title }}">
             {% endif %}
             <div class="card-body">
                 <h5 class="card-title">{{ recipe.title }}</h5>
-                <div class="card-text">
+                <p class="card-text">
                     {% if recipe.description %}
                         {{ recipe.description | safe | truncate(100, True, '...') }}
                     {% else %}
-                        <p>No description available.</p>
+                        No description available.
                     {% endif %}
-                </div>
+                </p>
+                <p class="card-text">
+                    <small class="text-muted">
+                        Difficulty: {{ recipe.difficulty | capitalize }}
+                    </small>
+                </p>
             </div>
             <div class="card-footer">
-                <a href="{{ url_for('recipe', id=recipe.id) }}" class="btn btn-primary">
-                    <i class="fas fa-eye"></i> View Recipe
-                </a>
+                <a href="{{ url_for('recipe', id=recipe.id) }}" class="btn btn-primary">View Recipe</a>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
+{% if recipes.items|length == 0 %}
+<div class="alert alert-info" role="alert">
+    No recipes found matching your search criteria.
+</div>
+{% endif %}
+
+<nav aria-label="Recipe pagination">
+    <ul class="pagination justify-content-center">
+        {% for page in recipes.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+            {% if page %}
+                {% if page != recipes.page %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('index', page=page, search=request.args.get('search', ''), category=request.args.get('category', ''), difficulty=request.args.get('difficulty', '')) }}">{{ page }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ page }}</span>
+                    </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</nav>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search');
-    const categoryFilter = document.getElementById('category-filter');
-    const recipeList = document.getElementById('recipe-list');
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search');
+        const categorySelect = document.getElementById('category');
+        const difficultySelect = document.getElementById('difficulty');
 
-    function performSearch() {
-        const query = searchInput.value;
-        const categoryId = categoryFilter.value;
-        
-        fetch(`/search?query=${query}&category=${categoryId}`)
-            .then(response => response.json())
-            .then(recipes => {
-                recipeList.innerHTML = '';
-                recipes.forEach(recipe => {
-                    const recipeCard = `
-                        <div class="col-md-4 mb-4">
-                            <div class="card h-100">
-                                ${recipe.image ? `<img src="/static/uploads/${recipe.image}" class="card-img-top" alt="${recipe.title}">` : ''}
-                                <div class="card-body">
-                                    <h5 class="card-title">${recipe.title}</h5>
-                                    <div class="card-text">${recipe.description || 'No description available.'}</div>
-                                </div>
-                                <div class="card-footer">
-                                    <a href="/recipe/${recipe.id}" class="btn btn-primary">
-                                        <i class="fas fa-eye"></i> View Recipe
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    recipeList.innerHTML += recipeCard;
-                });
-            });
-    }
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            updateRecipes();
+        });
 
-    searchInput.addEventListener('input', performSearch);
-    categoryFilter.addEventListener('change', performSearch);
-});
+        categorySelect.addEventListener('change', updateRecipes);
+        difficultySelect.addEventListener('change', updateRecipes);
+
+        function updateRecipes() {
+            const searchQuery = searchInput.value;
+            const categoryId = categorySelect.value;
+            const difficulty = difficultySelect.value;
+
+            fetch(`/search?query=${searchQuery}&category=${categoryId}&difficulty=${difficulty}`)
+                .then(response => response.json())
+                .then(data => {
+                    const recipeList = document.getElementById('recipe-list');
+                    recipeList.innerHTML = '';
+
+                    data.forEach(recipe => {
+                        const recipeCard = createRecipeCard(recipe);
+                        recipeList.appendChild(recipeCard);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function createRecipeCard(recipe) {
+            const col = document.createElement('div');
+            col.className = 'col-md-4 mb-4';
+
+            col.innerHTML = `
+                <div class="card h-100">
+                    ${recipe.image ? `<img src="/static/uploads/${recipe.image}" class="card-img-top" alt="${recipe.title}">` : ''}
+                    <div class="card-body">
+                        <h5 class="card-title">${recipe.title}</h5>
+                        <p class="card-text">${recipe.description || 'No description available.'}</p>
+                        <p class="card-text">
+                            <small class="text-muted">Difficulty: ${recipe.difficulty}</small>
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="/recipe/${recipe.id}" class="btn btn-primary">View Recipe</a>
+                    </div>
+                </div>
+            `;
+
+            return col;
+        }
+    });
 </script>
 {% endblock %}

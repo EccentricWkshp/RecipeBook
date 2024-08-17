@@ -19,14 +19,35 @@ migrate = Migrate(app, db)
 
 @app.route('/')
 def index():
+    page = request.args.get('page', 1, type=int)
+    search = request.args.get('search', '')
+    category_id = request.args.get('category', '')
+    difficulty = request.args.get('difficulty', '')
+
     try:
-        recipes = Recipe.query.all()
+        query = Recipe.query
+
+        if search:
+            query = query.filter(or_(Recipe.title.ilike(f'%{search}%'), Recipe.description.ilike(f'%{search}%')))
+        
+        if category_id:
+            query = query.filter(Recipe.category_id == category_id)
+        
+        if difficulty:
+            query = query.filter(Recipe.difficulty == difficulty)
+
+        # Add an order_by clause to fix the MSSQL pagination issue
+        query = query.order_by(Recipe.id)
+
+        recipes = query.paginate(page=page, per_page=9, error_out=False)
         categories = Category.query.all()
         return render_template('index.html', recipes=recipes, categories=categories)
     except SQLAlchemyError as e:
         logger.error(f"Database error: {str(e)}")
         flash("An error occurred while fetching recipes. Please try again later.", "error")
-        return render_template('index.html', recipes=[], categories=[])
+        # Create an empty list to avoid the 'list' object has no attribute 'iter_pages' error
+        empty_recipes = []
+        return render_template('index.html', recipes=empty_recipes, categories=[])
 
 @app.route('/recipe/<int:id>')
 def recipe(id):
@@ -51,6 +72,10 @@ def add_recipe():
             else:
                 image_path = None
 
+            category_id = request.form['category']
+            if category_id == '':
+                category_id = None  # Set to None if no category is selected
+
             new_recipe = Recipe(
                 title=request.form['title'],
                 description=request.form['description'],
@@ -58,7 +83,8 @@ def add_recipe():
                 instructions=request.form['instructions'],
                 source=request.form['source'],
                 image=image_path,
-                category_id=request.form['category']
+                category_id=category_id,
+                difficulty=request.form['difficulty']
             )
             db.session.add(new_recipe)
             db.session.commit()
@@ -81,13 +107,13 @@ def edit_recipe(id):
             recipe.ingredients = request.form['ingredients']
             recipe.instructions = request.form['instructions']
             recipe.source = request.form['source']
+            recipe.difficulty = request.form['difficulty']
             
-            # Handle category_id
             category_id = request.form['category']
             if category_id:
                 recipe.category_id = int(category_id)
             else:
-                recipe.category_id = None  # Set to NULL if no category is selected
+                recipe.category_id = None
 
             image = request.files['image']
             if image and image.filename:
@@ -147,6 +173,7 @@ def add_category():
 def search():
     query = request.args.get('query', '')
     category_id = request.args.get('category', '')
+    difficulty = request.args.get('difficulty', '')
     
     recipes = Recipe.query
     
@@ -156,14 +183,18 @@ def search():
     if category_id:
         recipes = recipes.filter(Recipe.category_id == category_id)
     
+    if difficulty:
+        recipes = recipes.filter(Recipe.difficulty == difficulty)
+    
     recipes = recipes.all()
     
     return jsonify([{
         'id': recipe.id,
         'title': recipe.title,
         'description': recipe.description if recipe.description else 'No description available.',
-        'image': recipe.image
+        'image': recipe.image,
+        'difficulty': recipe.difficulty
     } for recipe in recipes])
 
 if __name__ == '__main__':
-    app.run(debug=True, host="127.0.0.1", port=5000)  # Modify the port if needed
+    app.run(debug=True, host="127.0.0.1", port=5000)
