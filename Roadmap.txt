@@ -5,13 +5,15 @@
 2. Comprehensive Recipe Details
 - Step-by-Step Instructions: Clearly laid out steps with the option to focus on one step at a time.
 - Ingredient List with Quantities: Display ingredients clearly, with an option to adjust based on serving sizes.
-- Nutritional Information: Optional, but could include basic details like calories.
-- Cooking Time: Display preparation, cooking, and total time.
-- Difficulty Level: Indicate the difficulty to help users select recipes suited to their skill level.
-- Calorie and Nutrient Tracking
+x Nutritional Information: Optional, but could include basic details like calories.
+x Cooking Time: Display preparation, cooking, and total time.
+x Difficulty Level: Indicate the difficulty to help users select recipes suited to their skill level.
+x Calorie and Nutrient Tracking
+x Cuisine type
+x Recipe notes
 
 3. Recipe Sharing and Community Features
-- Ratings and Notes: Even if it's just for local use, having the ability to rate recipes can help in curating favorites.
+x Ratings and Notes: Even if it's just for local use, having the ability to rate recipes can help in curating favorites.
 - Recipe Collections: Users can create and manage their collections or folders of recipes for easier organization.
 - Meal Planning Tools: Users can plan meals for the week and automatically generate a shopping list.
 

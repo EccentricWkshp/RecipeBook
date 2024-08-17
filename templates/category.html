@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h1 class="mb-4">{{ category.name }} Recipes</h1>
+
+    {% if recipes %}
+        <div class="row">
+            {% for recipe in recipes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        {% if recipe.image %}
+                            <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" class="card-img-top" alt="{{ recipe.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ recipe.title }}</h5>
+                            {% if recipe.description %}
+                                <p class="card-text">{{ recipe.description | safe | truncate(100, True, '...') }}</p>
+                            {% else %}
+                                <p class="card-text">No description available.</p>
+                            {% endif %}
+                            <p class="card-text"><small class="text-muted">Difficulty: {{ recipe.difficulty | capitalize }}</small></p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ url_for('recipe', id=recipe.id) }}" class="btn btn-primary">View Recipe</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No recipes found in this category.
+        </div>
+    {% endif %}
+
+    <a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">Back to All Recipes</a>
+</div>
+
+{% endblock %}

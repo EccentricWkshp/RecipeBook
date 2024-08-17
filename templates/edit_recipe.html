@@ -4,53 +4,125 @@
 <div class="card">
     <div class="card-body">
         <h1 class="card-title mb-4">Edit Recipe</h1>
+        
         <form method="POST" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
                 <input type="text" class="form-control" id="title" name="title" value="{{ recipe.title }}" required>
             </div>
+
             <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
+                <label for="description" class="form-label">Description (Optional)</label>
                 <textarea class="form-control" id="description" name="description">{{ recipe.description }}</textarea>
             </div>
+
             <div class="mb-3">
                 <label for="ingredients" class="form-label">Ingredients</label>
                 <textarea class="form-control" id="ingredients" name="ingredients" required>{{ recipe.ingredients }}</textarea>
             </div>
+
             <div class="mb-3">
                 <label for="instructions" class="form-label">Instructions</label>
                 <textarea class="form-control" id="instructions" name="instructions" required>{{ recipe.instructions }}</textarea>
             </div>
-            <div class="mb-3">
-                <label for="source" class="form-label">Source</label>
-                <input type="text" class="form-control" id="source" name="source" value="{{ recipe.source }}">
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="prep_time" class="form-label">Prep Time (minutes)</label>
+                    <input type="number" class="form-control" id="prep_time" name="prep_time" value="{{ recipe.prep_time }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="cook_time" class="form-label">Cook Time (minutes)</label>
+                    <input type="number" class="form-control" id="cook_time" name="cook_time" value="{{ recipe.cook_time }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="total_time" class="form-label">Total Time (minutes)</label>
+                    <input type="number" class="form-control" id="total_time" name="total_time" value="{{ recipe.total_time }}">
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="image" class="form-label">Image</label>
-                <input type="file" class="form-control" id="image" name="image">
-                {% if recipe.image %}
-                <p class="mt-2">Current image: {{ recipe.image }}</p>
-                {% endif %}
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="servings" class="form-label">Number of Servings</label>
+                    <input type="number" class="form-control" id="servings" name="servings" value="{{ recipe.servings }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="cooking_method" class="form-label">Cooking Method</label>
+                    <select class="form-select" id="cooking_method" name="cooking_method">
+                        <option value="">Select a cooking method</option>
+                        {% set methods = ['Baked', 'Grilled', 'Fried', 'Roasted', 'Boiled', 'Steamed', 'Sautéed', 'Broiled', 'Slow Cooked', 'Pressure Cooked', 'Smoked', 'Raw'] %}
+                        {% for method in methods %}
+                            <option value="{{ method }}" {% if recipe.cooking_method == method %}selected{% endif %}>{{ method }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
+
             <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <select class="form-select" id="category" name="category">
-                    <option value="">Select a category</option>
+                <label class="form-label">Nutritional Information (Optional)</label>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <input type="number" class="form-control" id="calories" name="calories" placeholder="Calories" value="{{ recipe.calories }}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <input type="number" step="0.1" class="form-control" id="protein" name="protein" placeholder="Protein (g)" value="{{ recipe.protein }}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <input type="number" step="0.1" class="form-control" id="carbs" name="carbs" placeholder="Carbs (g)" value="{{ recipe.carbs }}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <input type="number" step="0.1" class="form-control" id="fat" name="fat" placeholder="Fat (g)" value="{{ recipe.fat }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="categories" class="form-label">Categories (Select multiple if applicable)</label>
+                <select multiple class="form-select" id="categories" name="categories">
                     {% for category in categories %}
-                        <option value="{{ category.id }}" {% if category.id == recipe.category_id %}selected{% endif %}>
-                            {{ category.name }}
-                        </option>
+                        <option value="{{ category.id }}" {% if category in recipe.categories %}selected{% endif %}>{{ category.name }}</option>
                     {% endfor %}
                 </select>
             </div>
+
             <div class="mb-3">
-                <label for="difficulty" class="form-label">Difficulty</label>
-                <select class="form-select" id="difficulty" name="difficulty" required>
-                    <option value="easy" {% if recipe.difficulty == 'easy' %}selected{% endif %}>Easy</option>
-                    <option value="medium" {% if recipe.difficulty == 'medium' %}selected{% endif %}>Medium</option>
-                    <option value="hard" {% if recipe.difficulty == 'hard' %}selected{% endif %}>Hard</option>
+                <label for="cuisine" class="form-label">Cuisine (Optional)</label>
+                <select class="form-select" id="cuisine" name="cuisine">
+                    <option value="">Select a cuisine</option>
+                    {% for cuisine in cuisines %}
+                        <option value="{{ cuisine.id }}" {% if recipe.cuisine_id == cuisine.id %}selected{% endif %}>{{ cuisine.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
+
+            <div class="mb-3">
+                <label for="difficulty" class="form-label">Difficulty (Optional)</label>
+                <select class="form-select" id="difficulty" name="difficulty">
+                    <option value="">Select difficulty</option>
+                    {% for level in ['Easy', 'Medium', 'Hard'] %}
+                        <option value="{{ level }}" {% if recipe.difficulty == level %}selected{% endif %}>{{ level }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="source" class="form-label">Source (Optional)</label>
+                <input type="text" class="form-control" id="source" name="source" value="{{ recipe.source }}">
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Image (Optional)</label>
+                {% if recipe.image %}
+                    <p>Current image: {{ recipe.image }}</p>
+                {% endif %}
+                <input type="file" class="form-control" id="image" name="image">
+            </div>
+
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes (Optional)</label>
+                <textarea class="form-control" id="notes" name="notes">{{ recipe.notes }}</textarea>
+            </div>
+
             <button type="submit" class="btn btn-primary">Update Recipe</button>
             <a href="{{ url_for('recipe', id=recipe.id) }}" class="btn btn-secondary">Cancel</a>
         </form>
@@ -62,12 +134,39 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
+        const editors = {};
+        const editorConfig = {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
+            heading: {
+                options: [
+                    { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                    { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                    { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' }
+                ]
+            }
+        };
+
         ['description', 'ingredients', 'instructions'].forEach(fieldName => {
             ClassicEditor
-                .create(document.getElementById(fieldName))
+                .create(document.getElementById(fieldName), editorConfig)
+                .then(editor => {
+                    editors[fieldName] = editor;
+                })
                 .catch(error => {
                     console.error(error);
                 });
+        });
+
+        document.getElementById('recipeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Update textarea content with CKEditor data
+            for (const [fieldName, editor] of Object.entries(editors)) {
+                document.getElementById(fieldName).value = editor.getData();
+            }
+
+            // Submit the form
+            this.submit();
         });
     });
 </script>

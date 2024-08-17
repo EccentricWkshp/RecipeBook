@@ -4,48 +4,142 @@
 <div class="card">
     <div class="card-body">
         <h1 class="card-title mb-4">Add New Recipe</h1>
+        
+        <div class="mb-3">
+            <button id="toggleParseText" class="btn btn-secondary">Paste Recipe</button>
+        </div>
+
+        <div id="parseTextSection" style="display: none;">
+            <div class="mb-3">
+                <label for="parseText" class="form-label">Paste your recipe text here:</label>
+                <textarea class="form-control" id="parseText" rows="10"></textarea>
+            </div>
+            <button id="parseTextButton" class="btn btn-primary">Parse Text</button>
+        </div>
+
         <form method="POST" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
                 <input type="text" class="form-control" id="title" name="title" required>
             </div>
+
             <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
+                <label for="description" class="form-label">Description (Optional)</label>
                 <textarea class="form-control" id="description" name="description"></textarea>
             </div>
+
             <div class="mb-3">
                 <label for="ingredients" class="form-label">Ingredients</label>
                 <textarea class="form-control" id="ingredients" name="ingredients" required></textarea>
             </div>
+
             <div class="mb-3">
                 <label for="instructions" class="form-label">Instructions</label>
                 <textarea class="form-control" id="instructions" name="instructions" required></textarea>
             </div>
-            <div class="mb-3">
-                <label for="source" class="form-label">Source</label>
-                <input type="text" class="form-control" id="source" name="source">
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="prep_time" class="form-label">Prep Time (minutes)</label>
+                    <input type="number" class="form-control" id="prep_time" name="prep_time">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="cook_time" class="form-label">Cook Time (minutes)</label>
+                    <input type="number" class="form-control" id="cook_time" name="cook_time">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="total_time" class="form-label">Total Time (minutes)</label>
+                    <input type="number" class="form-control" id="total_time" name="total_time">
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="image" class="form-label">Image</label>
-                <input type="file" class="form-control" id="image" name="image">
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="servings" class="form-label">Number of Servings</label>
+                    <input type="number" class="form-control" id="servings" name="servings">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="cooking_method" class="form-label">Cooking Method</label>
+                    <select class="form-select" id="cooking_method" name="cooking_method">
+                        <option value="">Select a cooking method</option>
+                        <option value="Baked">Baked</option>
+                        <option value="Grilled">Grilled</option>
+                        <option value="Fried">Fried</option>
+                        <option value="Roasted">Roasted</option>
+                        <option value="Boiled">Boiled</option>
+                        <option value="Steamed">Steamed</option>
+                        <option value="Sautéed">Sautéed</option>
+                        <option value="Broiled">Broiled</option>
+                        <option value="Slow Cooked">Slow Cooked</option>
+                        <option value="Pressure Cooked">Pressure Cooked</option>
+                        <option value="Smoked">Smoked</option>
+                        <option value="Raw">Raw</option>
+                    </select>
+                </div>
             </div>
+
             <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <select class="form-select" id="category" name="category">
-                    <option value="">Select a category</option>
+                <label class="form-label">Nutritional Information (Optional)</label>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <input type="number" class="form-control" id="calories" name="calories" placeholder="Calories">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <input type="number" step="0.1" class="form-control" id="protein" name="protein" placeholder="Protein (g)">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <input type="number" step="0.1" class="form-control" id="carbs" name="carbs" placeholder="Carbs (g)">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <input type="number" step="0.1" class="form-control" id="fat" name="fat" placeholder="Fat (g)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="categories" class="form-label">Categories (Select multiple if applicable)</label>
+                <select multiple class="form-select" id="categories" name="categories">
                     {% for category in categories %}
                         <option value="{{ category.id }}">{{ category.name }}</option>
                     {% endfor %}
                 </select>
             </div>
+
             <div class="mb-3">
-                <label for="difficulty" class="form-label">Difficulty</label>
-                <select class="form-select" id="difficulty" name="difficulty" required>
-                    <option value="easy">Easy</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="hard">Hard</option>
+                <label for="cuisine" class="form-label">Cuisine (Optional)</label>
+                <select class="form-select" id="cuisine" name="cuisine">
+                    <option value="">Select a cuisine</option>
+                    {% for cuisine in cuisines %}
+                        <option value="{{ cuisine.id }}">{{ cuisine.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
+
+            <div class="mb-3">
+                <label for="difficulty" class="form-label">Difficulty (Optional)</label>
+                <select class="form-select" id="difficulty" name="difficulty">
+                    <option value="">Select difficulty</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="source" class="form-label">Source (Optional)</label>
+                <input type="text" class="form-control" id="source" name="source">
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Image (Optional)</label>
+                <input type="file" class="form-control" id="image" name="image">
+            </div>
+
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes (Optional)</label>
+                <textarea class="form-control" id="notes" name="notes"></textarea>
+            </div>
+
             <button type="submit" class="btn btn-primary">Add Recipe</button>
         </form>
     </div>
@@ -55,14 +149,179 @@
 
 {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
+    document.addEventListener('DOMContentLoaded', function() {
+        const editors = {};
+        const editorConfig = {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
+            heading: {
+                options: [
+                    { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                    { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                    { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' }
+                ]
+            }
+        };
+    
         ['description', 'ingredients', 'instructions'].forEach(fieldName => {
             ClassicEditor
-                .create(document.getElementById(fieldName))
+                .create(document.getElementById(fieldName), editorConfig)
+                .then(editor => {
+                    editors[fieldName] = editor;
+                })
                 .catch(error => {
                     console.error(error);
                 });
         });
+
+    const toggleButton = document.getElementById('toggleParseText');
+    const parseTextSection = document.getElementById('parseTextSection');
+    const parseButton = document.getElementById('parseButton');
+    const pastedText = document.getElementById('pastedText');
+    
+    toggleButton.addEventListener('click', function() {
+        parseTextSection.style.display = parseTextSection.style.display === 'none' ? 'block' : 'none';
     });
+    
+    parseButton.addEventListener('click', function() {
+        const text = pastedText.value;
+        const parsed = parseRecipeText(text);
+        
+        document.getElementById('title').value = parsed.title;
+        editors.description.setData(parsed.description);
+        editors.ingredients.setData(parsed.ingredients);
+        editors.instructions.setData(parsed.instructions);
+        document.getElementById('source').value = parsed.source;
+        
+        if (parsed.category) {
+            const categorySelect = document.getElementById('category');
+            for (let i = 0; i < categorySelect.options.length; i++) {
+                if (categorySelect.options[i].text.toLowerCase() === parsed.category.toLowerCase()) {
+                    categorySelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (parsed.cuisine) {
+            const cuisineSelect = document.getElementById('cuisine');
+            for (let i = 0; i < cuisineSelect.options.length; i++) {
+                if (cuisineSelect.options[i].text.toLowerCase() === parsed.cuisine.toLowerCase()) {
+                    cuisineSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (parsed.difficulty) {
+            const difficultySelect = document.getElementById('difficulty');
+            for (let i = 0; i < difficultySelect.options.length; i++) {
+                if (difficultySelect.options[i].value.toLowerCase() === parsed.difficulty.toLowerCase()) {
+                    difficultySelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+    });
+    
+    document.getElementById('recipeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Update textarea content with CKEditor data
+        for (const [fieldName, editor] of Object.entries(editors)) {
+            document.getElementById(fieldName).value = editor.getData();
+        }
+
+        // Submit the form
+        this.submit();
+    });
+    
+    function parseRecipeText(text) {
+        const lines = text.split('\n');
+        let parsed = {
+            title: '',
+            description: '',
+            ingredients: '',
+            instructions: '',
+            category: '',
+            cuisine: '',
+            difficulty: '',
+            source: ''
+        };
+        
+        let currentSection = '';
+        let ingredientsStarted = false;
+        let instructionsStarted = false;
+        
+        const instructionKeywords = ['directions', 'instructions', 'steps', 'method'];
+        
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            
+            // Skip empty lines
+            if (!line) continue;
+            
+            // Handle title (if not already set)
+            if (!parsed.title && !line.toLowerCase().startsWith('submitted by') && !line.toLowerCase().startsWith('tested by')) {
+                parsed.title = line;
+                continue;
+            }
+            
+            // Handle source information
+            if (line.toLowerCase().startsWith('submitted by') || line.toLowerCase().startsWith('tested by')) {
+                parsed.source += line + ' ';
+                continue;
+            }
+            
+            // Check for ingredients section
+            if (line.toLowerCase() === 'ingredients' || (line.match(/^\d+\.|\*|-/) && !instructionsStarted)) {
+                currentSection = 'ingredients';
+                ingredientsStarted = true;
+                continue;
+            }
+            
+            // Check for instructions section
+            if (instructionKeywords.some(keyword => line.toLowerCase().includes(keyword)) || (line.match(/^\d+\./) && ingredientsStarted)) {
+                currentSection = 'instructions';
+                instructionsStarted = true;
+                continue;
+            }
+            
+            // Skip nutrition facts
+            if (line.toLowerCase().includes('nutrition facts')) {
+                break; // Stop parsing here
+            }
+            
+            // Parse content based on current section
+            if (currentSection === 'ingredients' && line) {
+                parsed.ingredients += line + '\n';
+            } else if (currentSection === 'instructions' && line) {
+                parsed.instructions += line + '\n';
+            } else if (!currentSection && parsed.description.length < 500) {
+                // Limit description to prevent including too much unrelated text
+                parsed.description += line + ' ';
+            }
+            
+            // Try to identify cuisine or category
+            if (line.toLowerCase().includes('cuisine:')) {
+                parsed.cuisine = line.split(':')[1].trim();
+            } else if (line.toLowerCase().includes('category:')) {
+                parsed.category = line.split(':')[1].trim();
+            }
+            
+            // Try to identify difficulty
+            if (line.toLowerCase().includes('difficulty:')) {
+                parsed.difficulty = line.split(':')[1].trim();
+            }
+        }
+        
+        // Clean up parsed data
+        parsed.description = parsed.description.trim();
+        parsed.ingredients = parsed.ingredients.trim();
+        parsed.instructions = parsed.instructions.trim();
+        parsed.source = parsed.source.trim();
+        
+        return parsed;
+    }
+});
 </script>
 {% endblock %}

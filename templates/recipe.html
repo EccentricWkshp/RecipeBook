@@ -20,6 +20,32 @@
         <p>{{ recipe.description | safe }}</p>
     </div>
 
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <h3>Prep Time</h3>
+            <p>{{ recipe.prep_time }} minutes</p>
+        </div>
+        <div class="col-md-4">
+            <h3>Cook Time</h3>
+            <p>{{ recipe.cook_time }} minutes</p>
+        </div>
+        <div class="col-md-4">
+            <h3>Total Time</h3>
+            <p>{{ recipe.total_time }} minutes</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h3>Servings</h3>
+            <p>{{ recipe.servings }}</p>
+        </div>
+        <div class="col-md-6">
+            <h3>Cooking Method</h3>
+            <p>{{ recipe.cooking_method }}</p>
+        </div>
+    </div>
+
     <div class="mb-4">
         <h2>Ingredients</h2>
         {{ recipe.ingredients | safe }}
@@ -30,27 +56,69 @@
         {{ recipe.instructions | safe }}
     </div>
 
+    {% if recipe.calories or recipe.protein or recipe.carbs or recipe.fat %}
+        <div class="mb-4">
+            <h2>Nutritional Information</h2>
+            <ul>
+                {% if recipe.calories %}<li>Calories: {{ recipe.calories }}</li>{% endif %}
+                {% if recipe.protein %}<li>Protein: {{ recipe.protein }}g</li>{% endif %}
+                {% if recipe.carbs %}<li>Carbs: {{ recipe.carbs }}g</li>{% endif %}
+                {% if recipe.fat %}<li>Fat: {{ recipe.fat }}g</li>{% endif %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% if recipe.categories %}
+        <div class="mb-4">
+            <h2>Categories</h2>
+            <ul>
+                {% for category in recipe.categories %}
+                    <li><a href="{{ url_for('category', id=category.id) }}">{{ category.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% if recipe.cuisine %}
+        <div class="mb-4">
+            <h2>Cuisine</h2>
+            <p>{{ recipe.cuisine.name }}</p>
+        </div>
+    {% endif %}
+
+    {% if recipe.difficulty %}
+        <div class="mb-4">
+            <h2>Difficulty</h2>
+            <p>{{ recipe.difficulty }}</p>
+        </div>
+    {% endif %}
+
     {% if recipe.source %}
-    <div class="mb-4">
-        <h2>Source</h2>
-        {% if recipe.source.startswith('http') %}
-            <a href="{{ recipe.source }}" target="_blank">{{ recipe.source }}</a>
-        {% else %}
-            {{ recipe.source }}
-        {% endif %}
-    </div>
+        <div class="mb-4">
+            <h2>Source</h2>
+            {% if recipe.source.startswith('http') %}
+                <a href="{{ recipe.source }}" target="_blank">{{ recipe.source }}</a>
+            {% else %}
+                <p>{{ recipe.source }}</p>
+            {% endif %}
+        </div>
     {% endif %}
 
-    {% if recipe.category %}
-    <div class="mb-4">
-        <h2>Category</h2>
-        <a href="{{ url_for('category', id=recipe.category.id) }}">{{ recipe.category.name }}</a>
-    </div>
+    {% if recipe.notes %}
+        <div class="mb-4">
+            <h2>Notes</h2>
+            <p>{{ recipe.notes | safe }}</p>
+        </div>
     {% endif %}
 
     <div class="mb-4">
-        <h2>Difficulty</h2>
-        <p>{{ recipe.difficulty | capitalize }}</p>
+        <h2>Rating</h2>
+        <div id="recipe-rating" data-recipe-id="{{ recipe.id }}" data-current-rating="{{ recipe.rating or 0 }}">
+            {% for i in range(1, 6) %}
+                <span class="star" data-rating="{{ i }}">☆</span>
+            {% endfor %}
+        </div>
+        <p>Average Rating: <span id="average-rating">{{ "%.1f"|format(recipe.rating or 0) }}</span> ({{ recipe.rating_count }} votes)</p>
     </div>
 
     <div class="mb-4">
@@ -73,7 +141,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form action="{{ url_for('delete_recipe', id=recipe.id) }}" method="POST">
+                <form action="{{ url_for('delete_recipe', id=recipe.id) }}" method="POST" style="display: inline;">
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
@@ -81,4 +149,57 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ratingContainer = document.getElementById('recipe-rating');
+        const stars = ratingContainer.querySelectorAll('.star');
+        const averageRating = document.getElementById('average-rating');
+        const recipeId = ratingContainer.dataset.recipeId;
+        const currentRating = parseFloat(ratingContainer.dataset.currentRating);
+
+        function updateStars(rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.textContent = '★';
+                } else {
+                    star.textContent = '☆';
+                }
+            });
+        }
+
+        updateStars(currentRating);
+
+        stars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                updateStars(this.dataset.rating);
+            });
+
+            star.addEventListener('mouseout', function() {
+                updateStars(currentRating);
+            });
+
+            star.addEventListener('click', function() {
+                const rating = this.dataset.rating;
+                fetch(`/rate/${recipeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ rating: rating }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        averageRating.textContent = data.new_average.toFixed(1);
+                        ratingContainer.dataset.currentRating = data.new_average;
+                        updateStars(data.new_average);
+                    }
+                });
+            });
+        });
+    });
+</script>
 {% endblock %}
